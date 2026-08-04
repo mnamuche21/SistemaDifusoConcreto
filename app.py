@@ -1,62 +1,60 @@
-from kivy.app import App
-from kivy.uix.boxlayout import BoxLayout
-from kivy.core.window import Window
-from kivy.lang import Builder
-import os
-import sys
-
+import streamlit as st
 from logica.sistema import evaluar
 
 
-def resource_path(relative_path):
-    """Obtiene la ruta correcta tanto en desarrollo como en PyInstaller."""
+st.set_page_config(
+    page_title="Predicción de Resistencia del Concreto",
+    page_icon="🏗️"
+)
+
+
+st.title("Predicción de Resistencia del Concreto")
+st.write("Sistema difuso para estimar resistencia a compresión")
+
+
+cemento = st.number_input(
+    "Cemento (kg/m³)",
+    min_value=0.0
+)
+
+agua = st.number_input(
+    "Agua (kg/m³)",
+    min_value=0.0
+)
+
+superplastificante = st.number_input(
+    "Superplastificante (kg/m³)",
+    min_value=0.0
+)
+
+fino = st.number_input(
+    "Agregado fino (kg/m³)",
+    min_value=0.0
+)
+
+edad = st.number_input(
+    "Edad del concreto (días)",
+    min_value=1.0
+)
+
+
+if st.button("Calcular resistencia"):
+
     try:
-        base_path = sys._MEIPASS
-    except AttributeError:
-        base_path = os.path.abspath(".")
 
-    return os.path.join(base_path, relative_path)
+        resistencia = evaluar(
+            cemento,
+            agua,
+            superplastificante,
+            fino,
+            edad
+        )
 
+        st.success(
+            f"Resistencia estimada: {resistencia:.2f} MPa"
+        )
 
-# Tamaño de la ventana (solo para PC)
-Window.size = (520, 780)
+    except Exception as e:
 
-
-class Ventana(BoxLayout):
-
-    def calcular(self):
-        try:
-            cemento = float(self.ids.cemento.text)
-            agua = float(self.ids.agua.text)
-            superplastificante = float(self.ids.superplastificante.text)
-            fino = float(self.ids.fino.text)
-            edad = float(self.ids.edad.text)
-
-            resistencia = evaluar(
-                cemento,
-                agua,
-                superplastificante,
-                fino,
-                edad
-            )
-
-            self.ids.resultado.text = f"{resistencia:.2f} MPa"
-
-        except ValueError:
-            self.ids.resultado.text = "Datos inválidos"
-
-        except Exception as e:
-            self.ids.resultado.text = "Error"
-            print(e)
-
-
-class SistemaDifusoApp(App):
-
-    title = "Predicción de Resistencia del Concreto"
-
-    def build(self):
-        return Builder.load_file(resource_path("interfaz/interfaz.kv"))
-
-
-if __name__ == "__main__":
-    SistemaDifusoApp().run()
+        st.error("Error al calcular")
+        st.write(e)
