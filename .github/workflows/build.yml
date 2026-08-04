@@ -1,0 +1,45 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout del proyecto
+        uses: actions/checkout@v4
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar Buildozer
+        run: |
+          python -m pip install --upgrade pip
+          pip install buildozer cython
+
+      - name: Compilar APK
+        uses: ArtemSBulgakov/buildozer-action@v1
+        with:
+          workdir: .
+
+      - name: Subir APK
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: APK
+          path: |
+            bin/*.apk
+            **/bin/*.apk
