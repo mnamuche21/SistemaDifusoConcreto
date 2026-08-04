@@ -5,41 +5,60 @@ on:
   push:
     branches:
       - main
+      - master
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
-      - name: Checkout del proyecto
+      - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Configurar Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
 
       - name: Configurar Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Instalar dependencias del sistema
+        run: |
+          sudo apt-get update
+
+          sudo apt-get install -y \
+            git zip unzip autoconf automake libtool pkg-config \
+            zlib1g-dev libncurses5-dev libncursesw5-dev \
+            libtinfo6 cmake libffi-dev libssl-dev \
+            build-essential ccache \
+            libltdl-dev libsqlite3-dev sqlite3 \
+            python3-dev python3-pip \
+            libjpeg-dev libfreetype6-dev
+
       - name: Instalar Buildozer
         run: |
-          python -m pip install --upgrade pip
-          pip install buildozer cython
+          python -m pip install --upgrade pip setuptools wheel
+          pip install Cython==0.29.36
+          pip install buildozer
+
+      - name: Mostrar versiones
+        run: |
+          python --version
+          java -version
+          buildozer --version
 
       - name: Compilar APK
-        uses: ArtemSBulgakov/buildozer-action@v1
-        with:
-          workdir: .
+        run: |
+          buildozer android debug
 
       - name: Subir APK
+        if: success()
         uses: actions/upload-artifact@v4
-        if: always()
         with:
           name: APK
           path: |
             bin/*.apk
-            **/bin/*.apk
