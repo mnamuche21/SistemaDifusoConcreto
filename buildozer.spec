@@ -5,6 +5,8 @@
 
 [app]
 
+p4a.python_version = 3.11
+
 # (str) Title of your application
 title = Predicción de Resistencia del Concreto
 
@@ -42,7 +44,7 @@ version = 1.0
 
 # (list) Application requirements
 # comma separated e.g. requirements = python3,numpy,kivy,scikit-fuzzy
-requirements = python3,kivy
+requirements = python3,numpy,kivy,scikit-fuzzy
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
